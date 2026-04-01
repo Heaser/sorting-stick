@@ -1,0 +1,33 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "refinedstorage:disk_drive",
+      "required": false
+    },
+    {
+      "id": "refinedstorage:disk_interface",
+      "required": false
+    },
+    {
+      "id": "refinedstorage:network_transmitter",
+      "required": false
+    },
+    {
+      "id": "refinedstorage:autocrafter",
+      "required": false
+    },
+    {
+      "id": "ae2:drive",
+      "required": false
+    },
+    {
+      "id": "ae2:chest",
+      "required": false
+    },
+    {
+      "id": "ae2:io_port",
+      "required": false
+    }
+  ]
+}

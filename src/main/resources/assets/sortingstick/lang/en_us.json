@@ -1,0 +1,12 @@
+{
+  "item.sortingstick.sorting_stick": "Sorting Stick",
+  "item.sortingstick.sorting_stick.tooltip": "Right-click to merge and sort all nearby chests (breaks upon use)",
+  "item.sortingstick.sorting_stick.tooltip.detail": "Range: %s blocks",
+
+  "item.sortingstick.sorting_stick.message.already_sorted": "Everything is already in order.",
+  "item.sortingstick.sorting_stick.message.no_room": "Could not sort - there is no room in any nearby chest.",
+  "item.sortingstick.sorting_stick.message.partial_failure": "Sorted what could fit. The following items had no valid destination:",
+  "item.sortingstick.sorting_stick.message.failed_item": "  \u2022 %s \u00d7%s - stuck in chest at %s",
+
+  "itemGroup.sortingstick.tab": "Sorting Stick"
+}
