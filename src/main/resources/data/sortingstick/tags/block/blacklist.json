@@ -2,6 +2,18 @@
   "replace": false,
   "values": [
     {
+      "id": "minecraft:blast_furnace",
+      "required": false
+    },
+    {
+      "id": "minecraft:furnace",
+      "required": false
+    },
+    {
+      "id": "minecraft:hopper",
+      "required": false
+    },
+    {
       "id": "refinedstorage:disk_drive",
       "required": false
     },
