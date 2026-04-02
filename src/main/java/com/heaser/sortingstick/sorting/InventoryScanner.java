@@ -1,6 +1,7 @@
 package com.heaser.sortingstick.sorting;
 
 import com.heaser.sortingstick.ModTags;
+import com.heaser.sortingstick.config.SortingStickConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -36,7 +37,11 @@ public class InventoryScanner {
 
             BlockState state = level.getBlockState(immutablePos);
 
-            if (state.is(ModTags.BLACKLIST)) continue;
+            if (SortingStickConfig.FILTER_MODE.get() == SortingStickConfig.FilterMode.WHITELIST) {
+                if (!state.is(ModTags.WHITELIST)) continue;
+            } else {
+                if (state.is(ModTags.BLACKLIST)) continue;
+            }
             if (!(level.getBlockEntity(immutablePos) instanceof Container)) continue;
             if (!hasPermission(player, immutablePos)) continue;
 
