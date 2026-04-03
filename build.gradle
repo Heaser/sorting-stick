@@ -63,9 +63,29 @@ neoForge {
 
 repositories {
     mavenLocal()
+    maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 dependencies {
+//    //RS
+//    implementation "curse.maven:refined-storage-243076:7610477"
+//    // AE2
+//    implementation "curse.maven:guideme-1173950:7127444"
+//    implementation "curse.maven:applied-energistics-2-223794:7027323"
+//    // Buuz Stuff
+//    implementation "curse.maven:titanium-287342:6443608"
+//    implementation "curse.maven:functional-storage-556861:6930104"
+//    //Sophisticated Stuff
+//    implementation "curse.maven:sophisticated-core-618298:7858124"
+//    implementation "curse.maven:sophisticated-storage-619320:7865079"
+//    implementation "curse.maven:sophisticated-backpacks-422301:7854633"
+//    // JEI
+//    implementation "curse.maven:jei-238222:7420587"
 }
 
 tasks.withType(ProcessResources).configureEach {

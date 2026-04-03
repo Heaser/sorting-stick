@@ -10,11 +10,15 @@ import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -42,12 +46,11 @@ public class InventoryScanner {
             } else {
                 if (state.is(ModTags.BLACKLIST)) continue;
             }
-            if (!(level.getBlockEntity(immutablePos) instanceof Container)) continue;
-            if (!hasPermission(player, immutablePos)) continue;
 
             Block block = state.getBlock();
 
             if (block instanceof ChestBlock chestBlock) {
+                if (!hasPermission(player, immutablePos)) continue;
                 Container combined = ChestBlock.getContainer(chestBlock, state, level, immutablePos, true);
                 if (combined != null && combined.getContainerSize() > 27) {
                     Direction facing = ChestBlock.getConnectedDirection(state);
@@ -60,13 +63,44 @@ public class InventoryScanner {
                     Container single = (Container) level.getBlockEntity(immutablePos);
                     result.add(new ChestInventory(immutablePos, single, false));
                 }
-            } else if (level.getBlockEntity(immutablePos) instanceof Container container) {
+            } else {
+                Container container = resolveContainer(level, immutablePos);
+                if (container == null) continue;
+                if (!hasPermission(player, immutablePos)) continue;
                 result.add(new ChestInventory(immutablePos, container, false));
             }
         }
 
         return result;
     }
+
+    private static Container resolveContainer(ServerLevel level, BlockPos pos) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof Container c) return c;
+
+        IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, null);
+
+        if (handler == null) {
+            for (Direction dir : Direction.values()) {
+                handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, dir);
+                if (handler != null) break;
+            }
+        }
+
+        if (handler == null) return null;
+
+        if (!handlerSupportsExtraction(handler)) return null;
+
+        return new ItemHandlerContainerAdapter(handler);
+    }
+
+    private static boolean handlerSupportsExtraction(IItemHandler handler) {
+        for (int slot = 0; slot < handler.getSlots(); slot++) {
+            if (!handler.getStackInSlot(slot).isEmpty()) return true;
+        }
+        return false;
+    }
+
     // Tries to handle FTB Chunks and player permissions
     private static boolean hasPermission(ServerPlayer player, BlockPos pos) {
         BlockHitResult hitResult = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);

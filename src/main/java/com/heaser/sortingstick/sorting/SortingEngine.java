@@ -24,6 +24,7 @@ public class SortingEngine {
 
         boolean internalChanged = false;
         for (ChestInventory ci : inventories) {
+            if (ci.inventory() instanceof ISlotLimitContainer) continue;
             if (consolidateInternalSlots(ci.inventory())) {
                 SortingStick.LOGGER.debug("[SortingEngine] Step1: consolidated internal stacks at {}", ci.primaryPos());
                 internalChanged = true;
@@ -110,7 +111,9 @@ public class SortingEngine {
         }
 
         for (ChestInventory ci : inventories) {
-            sortInternalSlots(ci.inventory());
+            if (!(ci.inventory() instanceof ISlotLimitContainer)) {
+                sortInternalSlots(ci.inventory());
+            }
         }
 
         List<SortMove> moves = buildMovesFromDelta(inventories, prePassCounts);
@@ -183,44 +186,109 @@ public class SortingEngine {
         Container srcInv = src.inventory();
         Container dstInv = dst.inventory();
 
+        boolean srcIsHandler = srcInv instanceof ItemHandlerContainerAdapter;
+        boolean dstIsHandler = dstInv instanceof ItemHandlerContainerAdapter;
+
         ItemStack srcStack = srcInv.getItem(srcSlot);
         if (srcStack.isEmpty()) return 0;
 
         int maxStack = srcStack.getMaxStackSize();
         int transferred = 0;
 
-        // Pass 1: fill existing compatible stacks in destination
         for (int dstSlot = 0; dstSlot < dstInv.getContainerSize(); dstSlot++) {
+            if (srcIsHandler) srcStack = srcInv.getItem(srcSlot);
             if (srcStack.isEmpty()) break;
 
             ItemStack dstStack = dstInv.getItem(dstSlot);
             if (dstStack.isEmpty()) continue;
             if (!ItemStack.isSameItemSameComponents(dstStack, srcStack)) continue;
-            if (dstStack.getCount() >= maxStack) continue;
 
-            int canFit = maxStack - dstStack.getCount();
+            int slotLimit = dstIsHandler
+                    ? ((ISlotLimitContainer) dstInv).getSlotLimit(dstSlot)
+                    : maxStack;
+            if (dstStack.getCount() >= slotLimit) continue;
+
+            int canFit = slotLimit - dstStack.getCount();
             int toMove = Math.min(canFit, srcStack.getCount());
+            transferred += atomicTransfer(srcInv, srcSlot, srcStack, dstInv, dstSlot, dstStack, toMove, srcIsHandler, dstIsHandler);
+        }
 
+        for (int dstSlot = 0; dstSlot < dstInv.getContainerSize(); dstSlot++) {
+            if (srcIsHandler) srcStack = srcInv.getItem(srcSlot);
+            if (srcStack.isEmpty()) break;
+            if (!dstInv.getItem(dstSlot).isEmpty()) continue;
+
+            int slotLimit = dstIsHandler
+                    ? ((ISlotLimitContainer) dstInv).getSlotLimit(dstSlot)
+                    : maxStack;
+            int toMove = Math.min(slotLimit, srcStack.getCount());
+            transferred += atomicTransferToEmpty(srcInv, srcSlot, srcStack, dstInv, dstSlot, toMove, srcIsHandler, dstIsHandler);
+        }
+
+        return transferred;
+    }
+
+    private static int atomicTransfer(
+            Container srcInv, int srcSlot, ItemStack srcStack,
+            Container dstInv, int dstSlot, ItemStack dstStack,
+            int toMove, boolean srcIsHandler, boolean dstIsHandler) {
+
+        if (dstIsHandler) {
+            ItemHandlerContainerAdapter dstAdapter = (ItemHandlerContainerAdapter) dstInv;
+            int inserted = dstAdapter.directInsert(dstSlot, srcStack.copyWithCount(toMove));
+            if (inserted <= 0) return 0;
+            if (srcIsHandler) {
+                ((ItemHandlerContainerAdapter) srcInv).directExtract(srcSlot, inserted);
+            } else {
+                srcStack.shrink(inserted);
+                inv_setOrClear(srcInv, srcSlot, srcStack);
+            }
+            return inserted;
+
+        } else if (srcIsHandler) {
+            ItemStack extracted = ((ItemHandlerContainerAdapter) srcInv).directExtract(srcSlot, toMove);
+            if (extracted.isEmpty()) return 0;
+            dstStack.grow(extracted.getCount());
+            dstInv.setItem(dstSlot, dstStack);
+            return extracted.getCount();
+
+        } else {
             dstStack.grow(toMove);
             srcStack.shrink(toMove);
             dstInv.setItem(dstSlot, dstStack);
             inv_setOrClear(srcInv, srcSlot, srcStack);
-            transferred += toMove;
+            return toMove;
         }
+    }
 
-        // Pass 2: fill empty slots in destination
-        for (int dstSlot = 0; dstSlot < dstInv.getContainerSize(); dstSlot++) {
-            if (srcStack.isEmpty()) break;
+    private static int atomicTransferToEmpty(
+            Container srcInv, int srcSlot, ItemStack srcStack,
+            Container dstInv, int dstSlot,
+            int toMove, boolean srcIsHandler, boolean dstIsHandler) {
 
-            if (!dstInv.getItem(dstSlot).isEmpty()) continue;
+        if (dstIsHandler) {
+            ItemHandlerContainerAdapter dstAdapter = (ItemHandlerContainerAdapter) dstInv;
+            int inserted = dstAdapter.directInsert(dstSlot, srcStack.copyWithCount(toMove));
+            if (inserted <= 0) return 0;
+            if (srcIsHandler) {
+                ((ItemHandlerContainerAdapter) srcInv).directExtract(srcSlot, inserted);
+            } else {
+                srcStack.shrink(inserted);
+                inv_setOrClear(srcInv, srcSlot, srcStack);
+            }
+            return inserted;
 
-            int toMove = Math.min(maxStack, srcStack.getCount());
+        } else if (srcIsHandler) {
+            ItemStack extracted = ((ItemHandlerContainerAdapter) srcInv).directExtract(srcSlot, toMove);
+            if (extracted.isEmpty()) return 0;
+            dstInv.setItem(dstSlot, extracted);
+            return extracted.getCount();
+
+        } else {
             dstInv.setItem(dstSlot, srcStack.split(toMove));
             inv_setOrClear(srcInv, srcSlot, srcStack);
-            transferred += toMove;
+            return toMove;
         }
-
-        return transferred;
     }
 
     private static void inv_setOrClear(Container inv, int slot, ItemStack stack) {
@@ -268,7 +336,6 @@ public class SortingEngine {
                 if (delta > 0) remainingGain.put(ci, delta);
             }
 
-            // Pair each source (chest that lost items) against destinations
             for (ChestInventory src : inventories) {
                 int lost = before.get(src).getOrDefault(item, 0) - after.get(src).getOrDefault(item, 0);
                 if (lost <= 0) continue;

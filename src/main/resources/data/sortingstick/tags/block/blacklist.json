@@ -40,6 +40,26 @@
     {
       "id": "ae2:io_port",
       "required": false
+    },
+    {
+      "id": "functionalstorage:storage_controller",
+      "required": false
+    },
+    {
+      "id": "functionalstorage:framed_storage_controller",
+      "required": false
+    },
+    {
+      "id": "functionalstorage:controller_extension",
+      "required": false
+    },
+    {
+      "id": "functionalstorage:framed_controller_extension",
+      "required": false
+    },
+    {
+      "id": "sophisticatedstorage:controller",
+      "required": false
     }
   ]
 }
