@@ -82,6 +82,8 @@ public class ItemHandlerContainerAdapter implements ISlotLimitContainer {
 
     }
 
+    IItemHandler getHandler() { return handler; }
+
     int directInsert(int slot, ItemStack stack) {
         ItemStack leftover = handler.insertItem(slot, stack, false);
         return stack.getCount() - leftover.getCount();

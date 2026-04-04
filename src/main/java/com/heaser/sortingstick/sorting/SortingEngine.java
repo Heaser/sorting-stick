@@ -48,7 +48,6 @@ public class SortingEngine {
                 Item item = entry.getKey();
                 List<ItemLocation> locations = entry.getValue();
 
-                // Group slots by chest and compute each chest's live total for this item
                 Map<ChestInventory, List<Integer>> slotsByChest = new LinkedHashMap<>();
                 for (ItemLocation loc : locations) {
                     if (!loc.chest().inventory().getItem(loc.slot()).isEmpty())
@@ -163,7 +162,6 @@ public class SortingEngine {
             for (int j = i + 1; j < size; j++) {
                 ItemStack source = inv.getItem(j);
                 if (source.isEmpty()) continue;
-                // Only merge truly identical stacks (same item + same data components)
                 if (!ItemStack.isSameItemSameComponents(target, source)) continue;
 
                 int canFit = maxStack - target.getCount();
@@ -235,6 +233,12 @@ public class SortingEngine {
 
         if (dstIsHandler) {
             ItemHandlerContainerAdapter dstAdapter = (ItemHandlerContainerAdapter) dstInv;
+            if (srcIsHandler) {
+                ItemStack simulated = ((ItemHandlerContainerAdapter) srcInv).getHandler()
+                        .extractItem(srcSlot, toMove, true);
+                if (simulated.isEmpty()) return 0;
+                toMove = simulated.getCount();
+            }
             int inserted = dstAdapter.directInsert(dstSlot, srcStack.copyWithCount(toMove));
             if (inserted <= 0) return 0;
             if (srcIsHandler) {
@@ -268,6 +272,12 @@ public class SortingEngine {
 
         if (dstIsHandler) {
             ItemHandlerContainerAdapter dstAdapter = (ItemHandlerContainerAdapter) dstInv;
+            if (srcIsHandler) {
+                ItemStack simulated = ((ItemHandlerContainerAdapter) srcInv).getHandler()
+                        .extractItem(srcSlot, toMove, true);
+                if (simulated.isEmpty()) return 0;
+                toMove = simulated.getCount();
+            }
             int inserted = dstAdapter.directInsert(dstSlot, srcStack.copyWithCount(toMove));
             if (inserted <= 0) return 0;
             if (srcIsHandler) {
@@ -314,7 +324,6 @@ public class SortingEngine {
             Map<ChestInventory, Map<Item, Integer>> before) {
         Map<ChestInventory, Map<Item, Integer>> after = computeItemCounts(inventories);
 
-        // Collect all item types that changed in at least one chest
         Set<Item> changedItems = new LinkedHashSet<>();
         for (ChestInventory ci : inventories) {
             Map<Item, Integer> b = before.get(ci);

@@ -17,13 +17,14 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.Collections;
 
 public class InventoryScanner {
 
@@ -31,6 +32,8 @@ public class InventoryScanner {
     public static List<ChestInventory> scan(ServerLevel level, ServerPlayer player, BlockPos center, int radius) {
         List<ChestInventory> result = new ArrayList<>();
         Set<BlockPos> visited = new HashSet<>();
+        Set<IItemHandler> seenHandlers = Collections.newSetFromMap(new IdentityHashMap<>());
+        Set<Container> seenContainers = Collections.newSetFromMap(new IdentityHashMap<>());
 
         for (BlockPos pos : BlockPos.betweenClosed(
                 center.offset(-radius, -radius, -radius),
@@ -67,6 +70,11 @@ public class InventoryScanner {
                 Container container = resolveContainer(level, immutablePos);
                 if (container == null) continue;
                 if (!hasPermission(player, immutablePos)) continue;
+                if (container instanceof ItemHandlerContainerAdapter adapter) {
+                    if (!seenHandlers.add(adapter.getHandler())) continue;
+                } else {
+                    if (!seenContainers.add(container)) continue;
+                }
                 result.add(new ChestInventory(immutablePos, container, false));
             }
         }
@@ -75,9 +83,6 @@ public class InventoryScanner {
     }
 
     private static Container resolveContainer(ServerLevel level, BlockPos pos) {
-        BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof Container c) return c;
-
         IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, null);
 
         if (handler == null) {
@@ -87,18 +92,15 @@ public class InventoryScanner {
             }
         }
 
-        if (handler == null) return null;
-
-        if (!handlerSupportsExtraction(handler)) return null;
-
-        return new ItemHandlerContainerAdapter(handler);
-    }
-
-    private static boolean handlerSupportsExtraction(IItemHandler handler) {
-        for (int slot = 0; slot < handler.getSlots(); slot++) {
-            if (!handler.getStackInSlot(slot).isEmpty()) return true;
+        if (handler != null) {
+            return new ItemHandlerContainerAdapter(handler);
         }
-        return false;
+
+        // Fall back to Container only when no IItemHandler is available.
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof Container c) return c;
+
+        return null;
     }
 
     // Tries to handle FTB Chunks and player permissions
