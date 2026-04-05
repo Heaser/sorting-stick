@@ -10,5 +10,6 @@
 
   "itemGroup.sortingstick.tab": "Sorting Stick",
 
-  "block.sortingstick.dumping_chest": "Dumping Chest"
+  "block.sortingstick.dumping_chest": "Dumping Chest",
+  "item.sortingstick.dumping_chest.tooltip": "The Sorting Stick will move items out of this chest, but never into it."
 }
