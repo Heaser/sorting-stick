@@ -15,6 +15,9 @@ public class ModCreativeTabs {
             TABS.register("sorting_stick_tab", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.sortingstick.tab"))
                     .icon(() -> ModItems.SORTING_STICK.get().getDefaultInstance())
-                    .displayItems((params, output) -> output.accept(ModItems.SORTING_STICK.get()))
+                    .displayItems((params, output) -> {
+                        output.accept(ModItems.SORTING_STICK.get());
+                        output.accept(ModItems.DUMPING_CHEST.get());
+                    })
                     .build());
 }

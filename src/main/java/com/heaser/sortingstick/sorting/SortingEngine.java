@@ -58,6 +58,9 @@ public class SortingEngine {
 
                 List<ChestInventory> ranked = new ArrayList<>(slotsByChest.keySet());
                 ranked.sort((a, b) -> {
+                    if (a.isDumpingChest() != b.isDumpingChest()) {
+                        return a.isDumpingChest() ? 1 : -1;
+                    }
                     int countA = slotsByChest.get(a).stream().mapToInt(s -> a.inventory().getItem(s).getCount()).sum();
                     int countB = slotsByChest.get(b).stream().mapToInt(s -> b.inventory().getItem(s).getCount()).sum();
                     return Integer.compare(countB, countA);
@@ -72,6 +75,7 @@ public class SortingEngine {
                         boolean moved = false;
                         for (int dstRank = 0; dstRank < srcRank; dstRank++) {
                             ChestInventory dstChest = ranked.get(dstRank);
+                            if (dstChest.isDumpingChest()) continue;
                             int transferred = transferSlotToChest(srcChest, srcSlot, dstChest);
                             if (transferred > 0) {
                                 SortingStick.LOGGER.debug("[SortingEngine]     moved {}x{} from {} (rank {}) → {} (rank {})",
@@ -86,7 +90,7 @@ public class SortingEngine {
 
                         ItemStack remaining = srcChest.inventory().getItem(srcSlot);
                         if (!remaining.isEmpty() && !moved) {
-                            if (freeSlots(ranked.get(0).inventory()) > 0) {
+                            if (!ranked.get(0).isDumpingChest() && freeSlots(ranked.get(0).inventory()) > 0) {
                                 SortingStick.LOGGER.debug("[SortingEngine]     STUCK {}x{} at {} - rank-0 has room but transfer failed",
                                         remaining.getCount(), item.getDescriptionId(), srcChest.primaryPos());
                                 passHasFailure = true;

@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "facing=north,type=single": { "model": "sortingstick:block/dumping_chest" },
+    "facing=south,type=single": { "model": "sortingstick:block/dumping_chest", "y": 180 },
+    "facing=east,type=single":  { "model": "sortingstick:block/dumping_chest", "y": 90 },
+    "facing=west,type=single":  { "model": "sortingstick:block/dumping_chest", "y": 270 },
+
+    "facing=north,type=left":   { "model": "sortingstick:block/dumping_chest" },
+    "facing=south,type=left":   { "model": "sortingstick:block/dumping_chest", "y": 180 },
+    "facing=east,type=left":    { "model": "sortingstick:block/dumping_chest", "y": 90 },
+    "facing=west,type=left":    { "model": "sortingstick:block/dumping_chest", "y": 270 },
+
+    "facing=north,type=right":  { "model": "sortingstick:block/dumping_chest" },
+    "facing=south,type=right":  { "model": "sortingstick:block/dumping_chest", "y": 180 },
+    "facing=east,type=right":   { "model": "sortingstick:block/dumping_chest", "y": 90 },
+    "facing=west,type=right":   { "model": "sortingstick:block/dumping_chest", "y": 270 }
+  }
+}

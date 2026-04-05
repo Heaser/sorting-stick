@@ -1,6 +1,7 @@
 package com.heaser.sortingstick.sorting;
 
 import com.heaser.sortingstick.ModTags;
+import com.heaser.sortingstick.block.DumpingChestBlock;
 import com.heaser.sortingstick.config.SortingStickConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -52,7 +53,12 @@ public class InventoryScanner {
 
             Block block = state.getBlock();
 
-            if (block instanceof ChestBlock chestBlock) {
+            if (block instanceof DumpingChestBlock) {
+                if (!hasPermission(player, immutablePos)) continue;
+                Container single = (Container) level.getBlockEntity(immutablePos);
+                if (single == null) continue;
+                result.add(new ChestInventory(immutablePos, single, false, true));
+            } else if (block instanceof ChestBlock chestBlock) {
                 if (!hasPermission(player, immutablePos)) continue;
                 Container combined = ChestBlock.getContainer(chestBlock, state, level, immutablePos, true);
                 if (combined != null && combined.getContainerSize() > 27) {
@@ -61,10 +67,10 @@ public class InventoryScanner {
                         BlockPos partnerPos = immutablePos.relative(facing);
                         visited.add(partnerPos.immutable());
                     }
-                    result.add(new ChestInventory(immutablePos, combined, true));
+                    result.add(new ChestInventory(immutablePos, combined, true, false));
                 } else {
                     Container single = (Container) level.getBlockEntity(immutablePos);
-                    result.add(new ChestInventory(immutablePos, single, false));
+                    result.add(new ChestInventory(immutablePos, single, false, false));
                 }
             } else {
                 Container container = resolveContainer(level, immutablePos);
@@ -75,7 +81,7 @@ public class InventoryScanner {
                 } else {
                     if (!seenContainers.add(container)) continue;
                 }
-                result.add(new ChestInventory(immutablePos, container, false));
+                result.add(new ChestInventory(immutablePos, container, false, false));
             }
         }
 

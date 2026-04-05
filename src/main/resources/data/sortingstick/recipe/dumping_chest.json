@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PPP",
+    "PSP",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "S": {
+      "item": "sortingstick:sorting_stick"
+    }
+  },
+  "result": {
+    "id": "sortingstick:dumping_chest",
+    "count": 1
+  }
+}

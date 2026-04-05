@@ -21,6 +21,8 @@ public class SortingStick {
 
     public SortingStick(IEventBus modEventBus, ModContainer modContainer) {
         ModItems.ITEMS.register(modEventBus);
+        ModBlocks.BLOCKS.register(modEventBus);
+        ModBlockEntities.BLOCK_ENTITY_TYPES.register(modEventBus);
         ModCreativeTabs.TABS.register(modEventBus);
         ModParticleTypes.PARTICLE_TYPES.register(modEventBus);
 

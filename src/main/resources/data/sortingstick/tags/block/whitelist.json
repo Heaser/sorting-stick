@@ -12,6 +12,10 @@
     {
       "id": "#minecraft:shulker_boxes",
       "required": false
+    },
+    {
+      "id": "sortingstick:dumping_chest",
+      "required": false
     }
   ]
 }
