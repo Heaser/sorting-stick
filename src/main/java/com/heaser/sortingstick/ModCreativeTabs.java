@@ -17,6 +17,7 @@ public class ModCreativeTabs {
                     .icon(() -> ModItems.SORTING_STICK.get().getDefaultInstance())
                     .displayItems((params, output) -> {
                         output.accept(ModItems.SORTING_STICK.get());
+                        output.accept(ModItems.IRON_SORTING_STICK.get());
                         output.accept(ModItems.DUMPING_CHEST.get());
                     })
                     .build());

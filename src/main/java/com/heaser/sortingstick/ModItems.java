@@ -1,6 +1,7 @@
 package com.heaser.sortingstick;
 
 import com.heaser.sortingstick.item.DumpingChestBlockItem;
+import com.heaser.sortingstick.item.IronSortingStickItem;
 import com.heaser.sortingstick.item.SortingStickItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -13,6 +14,11 @@ public class ModItems {
     public static final DeferredItem<SortingStickItem> SORTING_STICK =
             ITEMS.register("sorting_stick",
                     () -> new SortingStickItem(new Item.Properties().stacksTo(64)));
+
+    public static final DeferredItem<IronSortingStickItem> IRON_SORTING_STICK =
+            ITEMS.register("iron_sorting_stick",
+                    () -> new IronSortingStickItem(
+                            new Item.Properties().durability(16)));
 
     public static final DeferredItem<DumpingChestBlockItem> DUMPING_CHEST =
             ITEMS.register("dumping_chest",

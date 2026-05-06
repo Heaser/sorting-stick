@@ -8,6 +8,10 @@
   "item.sortingstick.sorting_stick.message.partial_failure": "Sorted what could fit. The following items had no valid destination:",
   "item.sortingstick.sorting_stick.message.failed_item": "  \u2022 %s \u00d7%s - stuck in chest at %s",
 
+  "item.sortingstick.iron_sorting_stick": "Iron Sorting Stick",
+  "item.sortingstick.iron_sorting_stick.tooltip": "Right-click to merge and sort nearby chests",
+  "item.sortingstick.iron_sorting_stick.tooltip.detail": "Range: %s blocks",
+
   "itemGroup.sortingstick.tab": "Sorting Stick",
 
   "block.sortingstick.dumping_chest": "Dumping Chest",

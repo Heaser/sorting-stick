@@ -1,6 +1,5 @@
 package com.heaser.sortingstick.item;
 
-import com.heaser.sortingstick.ModItems;
 import com.heaser.sortingstick.ModParticleTypes;
 import com.heaser.sortingstick.config.SortingStickConfig;
 import com.heaser.sortingstick.network.packets.SortAnimationPacket;
@@ -57,10 +56,9 @@ public class SortingStickItem extends Item {
             return InteractionResultHolder.pass(stack);
         }
 
-        EquipmentSlot slot = hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
-        player.onEquippedItemBroken(stack.getItem(), slot);
-        stack.shrink(1);
-        player.getCooldowns().addCooldown(ModItems.SORTING_STICK.get(), 100);
+        EquipmentSlot heldSlot = hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
+        consumeStackOnSuccessfulSort(stack, serverPlayer, heldSlot);
+        player.getCooldowns().addCooldown(stack.getItem(), 100);
         player.playSound(SoundEvents.ENDER_CHEST_OPEN, 1.0f, 1.2f);
 
         for (SortMove move : result.moves()) {
@@ -77,6 +75,15 @@ public class SortingStickItem extends Item {
         }
 
         return InteractionResultHolder.success(stack);
+    }
+
+    protected void consumeStackOnSuccessfulSort(ItemStack stack, ServerPlayer player, EquipmentSlot heldSlot) {
+        player.onEquippedItemBroken(stack.getItem(), heldSlot);
+        stack.shrink(1);
+    }
+
+    protected String getTooltipKeyPrefix() {
+        return "item.sortingstick.sorting_stick";
     }
 
 
@@ -114,9 +121,10 @@ public class SortingStickItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("item.sortingstick.sorting_stick.tooltip"));
+        String tooltipKeyPrefix = getTooltipKeyPrefix();
+        tooltipComponents.add(Component.translatable(tooltipKeyPrefix + ".tooltip"));
         tooltipComponents.add(Component.translatable(
-                "item.sortingstick.sorting_stick.tooltip.detail",
+                tooltipKeyPrefix + ".tooltip.detail",
                 SortingStickConfig.SORTING_RADIUS.get()
         ));
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
